@@ -2,3 +2,4 @@ rootProject.name = 'msa'
 
 include 'user-service'
 include 'service-discovery'
+include 'apigateway-service'
