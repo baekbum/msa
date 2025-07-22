@@ -1,6 +1,14 @@
 package com.example.user_service.jpa;
 
-import org.springframework.data.repository.CrudRepository;
+import com.example.user_service.dto.UserDto;
+import com.example.user_service.vo.UserCond;
 
-public interface UserRepository extends CrudRepository<UserEntity, Long> {
+import java.util.List;
+
+public interface UserRepository {
+    User insert(UserDto dto);
+    User selectById(String userId);
+    List<User> selectByCond(UserCond cond);
+    User update(String userId, UserDto dto);
+    User delete(String userId);
 }
