@@ -3,11 +3,13 @@ package com.example.user_service.jpa;
 import com.example.user_service.dto.UserDto;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "users")
-public class UserEntity {
+@NoArgsConstructor
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,10 +20,10 @@ public class UserEntity {
     private String name;
     @Column(nullable = false, unique = true)
     private String userId;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String encryptedPwd;
 
-    public UserEntity(UserDto dto) {
+    public User(UserDto dto) {
         this.email = dto.getEmail();
         this.name = dto.getName();
         this.userId = dto.getUserId();

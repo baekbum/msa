@@ -1,10 +1,12 @@
 package com.example.user_service.dto;
 
-import com.example.user_service.jpa.UserEntity;
+import com.example.user_service.jpa.User;
 import com.example.user_service.vo.RequestUser;
+import com.example.user_service.vo.ResponseOrder;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class UserDto {
@@ -15,6 +17,7 @@ public class UserDto {
     private Date createdAt;
 
     private String encryptedPwd;
+    private List<ResponseOrder> orders;
 
     public UserDto(RequestUser user) {
         this.email = user.getEmail();
@@ -22,7 +25,7 @@ public class UserDto {
         this.name = user.getName();
     }
 
-    public UserDto(UserEntity entity) {
+    public UserDto(User entity) {
         this.email = entity.getEmail();
         this.pwd = entity.getEncryptedPwd();
         this.name = entity.getName();
