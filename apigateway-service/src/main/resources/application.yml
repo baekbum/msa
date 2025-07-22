@@ -16,7 +16,7 @@ spring:
       server:
         webflux:
           default-filters:
-            - RewritePath=/user-service/(?<segment>.*), /${segment} # 핵심 설정
+            - RewritePath=/(?<serviceName>.*?)/(?<segment>.*), /${segment}
             - name: GlobalFilter
               args:
                 baseMessage: Spring Cloud Gateway WebFlux Global Filter
@@ -27,27 +27,10 @@ spring:
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/user-service/**
-            - id: first-service
-              uri: lb://MY-FIRST-SERVICE
+            - id: catalog-service
+              uri: lb://CATALOG-SERVICE
               predicates:
-                - Path=/first-service/**
-              filters:
-                #                - AddRequestHeader=f-request, 1st-request-header-by-yaml
-                #                - AddResponseHeader=f-response, 1st-response-header-from-yaml
-                - CustomFilter
-            - id: second-service
-              uri: lb://MY-SECOND-SERVICE
-              predicates:
-                - Path=/second-service/**
-              filters:
-                #                - AddRequestHeader=s-request, 2nd-request-header-by-yaml
-                #                - AddResponseHeader=s-response, 2nd-response-header-from-yaml
-                - name: CustomFilter
-                - name: LoggingFilter
-                  args:
-                    baseMessage: Hi, there.
-                    preLogger: true
-                    postLogger: true
+                - Path=/catalog-service/**
 
 logging:
   level:
