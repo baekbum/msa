@@ -2,6 +2,7 @@ package com.example.catalog_service.jpa;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "catalog")
+@NoArgsConstructor
 public class Catalog { // implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> createUser(@RequestBody RequestUser user) {
+    public ResponseEntity<?> insert(@RequestBody RequestUser user) {
         log.info(user.toString());
         UserDto userDto = new UserDto(user);
         userService.insert(userDto);
@@ -37,14 +37,14 @@ public class UserController {
     }
 
     @GetMapping("/search/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable("userId") String userId) {
+    public ResponseEntity<?> select(@PathVariable("userId") String userId) {
         ResponseUser responseUser = new ResponseUser(userService.selectById(userId));
         log.info("user : {}", responseUser);
         return ResponseEntity.status(HttpStatus.OK).body(responseUser);
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> getUsers(@RequestBody UserCond cond) {
+    public ResponseEntity<?> selectByCond(@RequestBody UserCond cond) {
         log.info("userCond : {}", cond);
         List<UserDto> userList = userService.selectByCond(cond);
 
@@ -56,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping("/delete/{userId}")
-    public ResponseEntity<?> deleteItem(@PathVariable("userId") String userId) {
+    public ResponseEntity<?> delete(@PathVariable("userId") String userId) {
         return ResponseEntity.ok(new ResponseUser(userService.delete(userId)));
     }
 
