@@ -2,5 +2,6 @@ rootProject.name = 'msa'
 
 include 'user-service'
 include 'catalog-service'
+include 'order-service'
 include 'service-discovery'
 include 'apigateway-service'

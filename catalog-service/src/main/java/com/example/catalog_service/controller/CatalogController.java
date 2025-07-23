@@ -21,7 +21,7 @@ public class CatalogController {
     private final CatalogService service;
 
     @GetMapping("/search")
-    public ResponseEntity<?> getCatalogs() {
+    public ResponseEntity<?> select() {
         List<CatalogDto> catalogList = service.selectAll();
 
         List<ResponseCatalog> result = catalogList.stream()
