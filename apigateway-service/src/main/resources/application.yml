@@ -27,6 +27,8 @@ spring:
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/user-service/**
+#              filters:
+#                - RemoveRequestHeader=Cookie
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
               predicates:
