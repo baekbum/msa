@@ -5,6 +5,7 @@ import com.example.user_service.vo.UserCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -18,12 +19,13 @@ public class UserRepositoryImpl implements UserRepository {
     //private final EntityManager em;
     private final JPAQueryFactory queryFactory;
     private final UserJpaRepository repository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User insert(UserDto dto) {
         dto.setUserId(UUID.randomUUID().toString());
         User user = new User(dto);
-        user.setEncryptedPwd("encrypted_password");
+        user.setEncryptedPwd(passwordEncoder.encode(dto.getPwd()));
 
         repository.save(user);
 
@@ -33,6 +35,14 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User selectById(String userId) {
         User foundUser = repository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return foundUser;
+    }
+
+    @Override
+    public User selectByEmail(String email) {
+        User foundUser = repository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return foundUser;
