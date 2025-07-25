@@ -21,7 +21,7 @@ public class UserDto {
 
     public UserDto(RequestUser user) {
         this.email = user.getEmail();
-        this.pwd = user.getPwd();
+        this.pwd = user.getPassword();
         this.name = user.getName();
     }
 
