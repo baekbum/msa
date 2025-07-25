@@ -23,12 +23,19 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
-            - id: user-service
+            - id: user-service-with-noAuth
+              uri: lb://USER-SERVICE
+              predicates:
+                  - Path=/user-service/{segment:h2-console|add|login}
+              filters:
+                  - RemoveRequestHeader=Cookie
+            - id: user-service-with-auth
               uri: lb://USER-SERVICE
               predicates:
                 - Path=/user-service/**
-#              filters:
-#                - RemoveRequestHeader=Cookie
+              filters:
+                - RemoveRequestHeader=Cookie
+                - AuthorizationHeaderFilter
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
               predicates:
@@ -48,3 +55,7 @@ logging:
     # 서비스 디스커버리 클라이언트 (Eureka) 관련 로그
     com.netflix.eureka: DEBUG
     com.netflix.discovery: DEBUG
+
+token:
+  secret: my-very-long-secret-key-1234567890123456
+  expiration-time: 86400000 # 10 days
