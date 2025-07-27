@@ -9,3 +9,4 @@
 7. order-service 기능 추가
 8. user-service에 토큰발급기능추가
 9. apigateway-service에 토큰 복호화 기능 및 라우팅 추가
+10. config-service 추가
