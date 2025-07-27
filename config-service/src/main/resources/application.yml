@@ -19,6 +19,6 @@ spring:
     config:
       server:
         git:
-          uri: https://githubcom/baekbum/msa-config
+          uri: https://github.com/baekbum/msa-config
 
 
