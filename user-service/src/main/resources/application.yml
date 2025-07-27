@@ -35,9 +35,15 @@ eureka:
     lease-renewal-interval-in-seconds: 20 # 20초마다 하트비트 전송
     lease-expiration-duration-in-seconds: 60 # 60초 동안 하트비트 없으면 만료
 
-token:
-  secret: my-very-long-secret-key-1234567890123456
-  expiration-time: 86400000 # 10 days
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - refresh
+          - health
+          - beans
+          - info
 
 #logging:
 #  level:
