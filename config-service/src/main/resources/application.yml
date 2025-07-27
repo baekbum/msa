@@ -1,0 +1,24 @@
+server:
+  port: 8888
+
+#spring:
+#  application:
+#    name: config-service
+#  profiles:
+#    active: native
+#  cloud:
+#    config:
+#      server:
+#        native:
+#          search-locations: file:///D:/springCloud/msa-config # <--- 슬래시 방향 및 개수 확인
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://githubcom/baekbum/msa-config
+
+
