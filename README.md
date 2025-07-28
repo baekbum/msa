@@ -11,3 +11,4 @@
 9. apigateway-service에 토큰 복호화 기능 및 라우팅 추가
 10. config-service 추가
 11. user-service 및 apigateway-serivce와 config-service 연동
+12. user, gateway, config 서비스에 레빗엠큐 추가
