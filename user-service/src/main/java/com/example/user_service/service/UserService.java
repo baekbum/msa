@@ -27,7 +27,8 @@ public class UserService  {
     @Transactional(readOnly = true)
     public UserDto selectById(String userId) {
         UserDto userDto = new UserDto(repository.selectById(userId));
-        userDto.setOrders(new ArrayList<>());
+        // 에러 시 FeignErrorDecoder 사용
+        userDto.setOrders(repository.getOrders(userId));
 
         return userDto;
     }
@@ -38,10 +39,11 @@ public class UserService  {
 
         List<UserDto> list = new ArrayList<>();
 
+        // 에러 시 FeignErrorDecoder 사용
         userEntities.stream()
                 .forEach(entity -> {
                     UserDto userDto = new UserDto(entity);
-                    userDto.setOrders(new ArrayList<>());
+                    userDto.setOrders(repository.getOrders(userDto.getUserId()));
                     list.add(userDto);
                 });
 

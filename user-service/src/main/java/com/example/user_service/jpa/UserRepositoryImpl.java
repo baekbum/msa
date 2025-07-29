@@ -1,10 +1,13 @@
 package com.example.user_service.jpa;
 
+import com.example.user_service.client.OrderServiceClient;
 import com.example.user_service.dto.UserDto;
+import com.example.user_service.vo.ResponseOrder;
 import com.example.user_service.vo.UserCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -20,6 +23,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final JPAQueryFactory queryFactory;
     private final UserJpaRepository repository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final OrderServiceClient orderServiceClient;
 
     @Override
     public User insert(UserDto dto) {
@@ -76,6 +80,12 @@ public class UserRepositoryImpl implements UserRepository {
         User user = selectById(userId);
         repository.delete(user);
         return user;
+    }
+
+    @Override
+    public List<ResponseOrder> getOrders(String userId) {
+        ResponseEntity<List<ResponseOrder>> orders = orderServiceClient.getOrderByUserId(userId);
+        return orders.getBody();
     }
 
     private BooleanExpression idEq(Long id, QUser user) {
