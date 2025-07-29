@@ -45,6 +45,9 @@ dependencies {
 	// 레빗엠큐 추가
 	implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp:4.3.0'
 
+	// feign 추가
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
