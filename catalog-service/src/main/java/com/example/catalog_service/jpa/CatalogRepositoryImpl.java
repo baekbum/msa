@@ -16,4 +16,9 @@ public class CatalogRepositoryImpl implements CatalogRepository {
     public List<Catalog> selectAll() {
         return repository.findAll();
     }
+    @Override
+    public Catalog selectByProductIdAndUpdateQuantity(String productId) {
+        return repository.findByProductId(productId)
+                .orElseThrow(() -> new RuntimeException("해당 상품 ID를 찾지 못함"));
+    }
 }

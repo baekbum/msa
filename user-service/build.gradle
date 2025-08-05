@@ -48,6 +48,9 @@ dependencies {
 	// feign 추가
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
 
+	// 마리아 디비 추가
+	implementation 'org.mariadb.jdbc:mariadb-java-client:3.5.3'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"

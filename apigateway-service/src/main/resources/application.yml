@@ -55,7 +55,7 @@ logging:
     # Spring Cloud Gateway의 라우팅 관련 로그
     org.springframework.cloud.gateway: DEBUG
     # 로드 밸런서 관련 로그 (Netflix Ribbon 또는 Spring Cloud LoadBalancer)
-    com.netflix.loadbalancer: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
     reactor.netty: DEBUG # 네트워크 관련 상세 로그
     # 서비스 디스커버리 클라이언트 (Eureka) 관련 로그
     com.netflix.eureka: DEBUG
