@@ -1,5 +1,6 @@
 package com.example.order_service.vo;
 
+import com.example.order_service.dto.OrderDto;
 import com.example.order_service.jpa.Order;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -25,4 +26,14 @@ public class ResponseOrder {
         this.totalPrice = order.getTotalPrice();
         this.createdAt = order.getCreatedAt();
     }
+
+    public ResponseOrder(OrderDto dto) {
+        this.orderId = dto.getOrderId();
+        this.productId = dto.getProductId();
+        this.quantity = dto.getQuantity();
+        this.unitPrice = dto.getUnitPrice();
+        this.totalPrice = dto.getTotalPrice();
+    }
+
+
 }
