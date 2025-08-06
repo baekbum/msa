@@ -51,6 +51,9 @@ dependencies {
 	// 마리아 디비 추가
 	implementation 'org.mariadb.jdbc:mariadb-java-client:3.5.3'
 
+	// Spring Cloud Circuit Breaker with Resilience4j
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.3.0'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
