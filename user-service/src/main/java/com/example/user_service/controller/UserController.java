@@ -22,29 +22,30 @@ public class UserController {
 
     @PostMapping("/add")
     public ResponseEntity<?> insert(@RequestBody RequestUser user) {
-        log.info(user.toString());
+        log.info("User add process start");
+
         UserDto userDto = new UserDto(user);
         userService.insert(userDto);
-
         ResponseUser responseUser = new ResponseUser(userDto);
-
-        log.info("user : {}", responseUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
     }
 
     @GetMapping("/search/{userId}")
     public ResponseEntity<?> select(@PathVariable("userId") String userId) {
+        log.info("User search process start");
+        log.info("UserId : {}", userId);
+
         ResponseUser responseUser = new ResponseUser(userService.selectById(userId));
-        log.info("user : {}", responseUser);
         return ResponseEntity.status(HttpStatus.OK).body(responseUser);
     }
 
     @PostMapping("/search")
     public ResponseEntity<?> selectByCond(@RequestBody UserCond cond) {
+        log.info("User search process start");
         log.info("userCond : {}", cond);
-        List<UserDto> userList = userService.selectByCond(cond);
 
+        List<UserDto> userList = userService.selectByCond(cond);
         List<ResponseUser> result = userList.stream()
                 .map(ResponseUser::new)
                 .toList();
@@ -54,6 +55,8 @@ public class UserController {
 
     @PostMapping("/delete/{userId}")
     public ResponseEntity<?> delete(@PathVariable("userId") String userId) {
+        log.info("User delete process start");
+        log.info("UserId : {}", userId);
         return ResponseEntity.ok(new ResponseUser(userService.delete(userId)));
     }
 

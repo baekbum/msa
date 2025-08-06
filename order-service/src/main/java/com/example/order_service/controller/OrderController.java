@@ -22,36 +22,30 @@ public class OrderController {
 
     @PostMapping("add/{userId}")
     public ResponseEntity<?> createOrder(@PathVariable("userId") String userId, @RequestBody RequestOrder orderDetails) {
-        log.info("Before add orders data");
+        log.info("Order add process start");
 
         OrderDto orderDto = new OrderDto(orderDetails);
         orderDto.setUserId(userId);
-
         ResponseOrder responseOrder = service.insert(orderDto);
 
-        log.info("After added orders data");
         return ResponseEntity.status(HttpStatus.CREATED).body(responseOrder);
     }
 
     @GetMapping("search/user/{userId}")
     public ResponseEntity<?> getOrderByUserId(@PathVariable("userId") String userId) throws Exception {
-        log.info("Before retrieve orders data");
+        log.info("Order search process start");
+        log.info("UserId : {}", userId);
 
         List<ResponseOrder> responseOrders = service.selectByUserId(userId);
-
-        log.info("Add retrieved orders data");
-
         return ResponseEntity.status(HttpStatus.OK).body(responseOrders);
     }
 
     @GetMapping("search/order/{orderId}")
     public ResponseEntity<?> getOrderByOrderId(@PathVariable("orderId") String orderId) throws Exception {
-        log.info("Before retrieve orders data");
+        log.info("Order search process start");
+        log.info("orderId : {}", orderId);
 
         ResponseOrder responseOrder = service.selectByOrderId(orderId);
-
-        log.info("Add retrieved orders data");
-
         return ResponseEntity.status(HttpStatus.OK).body(responseOrder);
     }
 }
