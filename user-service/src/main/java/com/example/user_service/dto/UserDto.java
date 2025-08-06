@@ -5,30 +5,31 @@ import com.example.user_service.vo.RequestUser;
 import com.example.user_service.vo.ResponseOrder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Data
 public class UserDto {
-    private String email;
-    private String name;
-    private String pwd;
     private String userId;
-    private Date createdAt;
+    private String name;
+    private String email;
+    private String password;
+    private LocalDateTime createdAt;
 
-    private String encryptedPwd;
     private List<ResponseOrder> orders;
 
     public UserDto(RequestUser user) {
+        this.userId = user.getUser_id();
         this.email = user.getEmail();
-        this.pwd = user.getPassword();
+        this.password = user.getPassword();
         this.name = user.getName();
     }
 
     public UserDto(User entity) {
-        this.email = entity.getEmail();
-        this.pwd = entity.getEncryptedPwd();
-        this.name = entity.getName();
         this.userId = entity.getUserId();
+        this.name = entity.getName();
+        this.email = entity.getEmail();
+        this.createdAt = entity.getCreateAt();
     }
 }

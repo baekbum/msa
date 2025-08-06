@@ -1,11 +1,16 @@
 package com.example.user_service.service;
 
+import com.example.user_service.client.OrderServiceClient;
 import com.example.user_service.dto.UserDto;
 import com.example.user_service.jpa.User;
 import com.example.user_service.jpa.UserRepository;
+import com.example.user_service.vo.ResponseOrder;
 import com.example.user_service.vo.UserCond;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +23,10 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class UserService  {
+
     private final UserRepository repository;
+    private final OrderServiceClient orderServiceClient;
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     public UserDto insert(UserDto dto) {
         return new UserDto(repository.insert(dto));
@@ -27,8 +35,7 @@ public class UserService  {
     @Transactional(readOnly = true)
     public UserDto selectById(String userId) {
         UserDto userDto = new UserDto(repository.selectById(userId));
-        // 에러 시 FeignErrorDecoder 사용
-        userDto.setOrders(repository.getOrders(userId));
+        userDto.setOrders(getOrders(userId));
 
         return userDto;
     }
@@ -39,11 +46,10 @@ public class UserService  {
 
         List<UserDto> list = new ArrayList<>();
 
-        // 에러 시 FeignErrorDecoder 사용
         userEntities.stream()
                 .forEach(entity -> {
                     UserDto userDto = new UserDto(entity);
-                    userDto.setOrders(repository.getOrders(userDto.getUserId()));
+                    userDto.setOrders(getOrders(userDto.getUserId()));
                     list.add(userDto);
                 });
 
@@ -52,5 +58,15 @@ public class UserService  {
 
     public UserDto delete(String userId) {
         return new UserDto(repository.delete(userId));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseOrder> getOrders(String userId) {
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
+        List<ResponseOrder> orders = circuitBreaker.run(
+                () -> orderServiceClient.getOrderByUserId(userId).getBody(),
+                throwable -> new ArrayList<>());
+
+        return orders;
     }
 }

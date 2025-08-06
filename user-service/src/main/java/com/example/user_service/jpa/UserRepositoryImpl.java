@@ -7,6 +7,7 @@ import com.example.user_service.vo.UserCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
@@ -23,13 +24,16 @@ public class UserRepositoryImpl implements UserRepository {
     private final JPAQueryFactory queryFactory;
     private final UserJpaRepository repository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final OrderServiceClient orderServiceClient;
 
     @Override
     public User insert(UserDto dto) {
-        dto.setUserId(UUID.randomUUID().toString());
+        if (repository.findByUserId(dto.getUserId()).isPresent()) {
+            throw new RuntimeException("Already User exist");
+        }
+
+        dto.setUserId(dto.getUserId());
         User user = new User(dto);
-        user.setEncryptedPwd(passwordEncoder.encode(dto.getPwd()));
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         repository.save(user);
 
@@ -82,11 +86,6 @@ public class UserRepositoryImpl implements UserRepository {
         return user;
     }
 
-    @Override
-    public List<ResponseOrder> getOrders(String userId) {
-        ResponseEntity<List<ResponseOrder>> orders = orderServiceClient.getOrderByUserId(userId);
-        return orders.getBody();
-    }
 
     private BooleanExpression idEq(Long id, QUser user) {
         return id != null ? user.id.eq(id) : null;

@@ -9,6 +9,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class RequestUser {
+
+    @NotNull(message = "User_id cannot be null")
+    private String user_id;
+
+    @NotNull(message = "Name cannot be null")
+    @Size(min = 2, message = "Name not be less than two characters")
+    private String name;
+
     @NotNull(message = "Email cannot be null")
     @Size(min = 2, message = "Email not be less than two characters")
     @Email
@@ -18,7 +26,5 @@ public class RequestUser {
     @Size(min = 8, message = "Password must be equal or grater than 8 characters")
     private String password;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 2, message = "Name not be less than two characters")
-    private String name;
+
 }

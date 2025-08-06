@@ -13,6 +13,4 @@ public interface UserRepository {
     List<User> selectByCond(UserCond cond);
     User update(String userId, UserDto dto);
     User delete(String userId);
-
-    List<ResponseOrder> getOrders(String userId);
 }
