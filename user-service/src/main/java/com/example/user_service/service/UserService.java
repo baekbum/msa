@@ -62,10 +62,13 @@ public class UserService  {
 
     @Transactional(readOnly = true)
     public List<ResponseOrder> getOrders(String userId) {
+        log.info("circuitBreaker start");
         CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
         List<ResponseOrder> orders = circuitBreaker.run(
                 () -> orderServiceClient.getOrderByUserId(userId).getBody(),
                 throwable -> new ArrayList<>());
+
+        log.info("circuitBreaker end");
 
         return orders;
     }

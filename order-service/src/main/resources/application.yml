@@ -37,6 +37,19 @@ eureka:
     lease-renewal-interval-in-seconds: 20 # 20초마다 하트비트 전송
     lease-expiration-duration-in-seconds: 60 # 60초 동안 하트비트 없으면 만료
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # 추적할 요청의 샘플링 확률 (0.0 ~ 1.0).
+      # 1.0은 모든 요청을 추적하며, 개발 단계에서 유용합니다.
+      # 0.1은 10%의 요청만 추적합니다.
+    enabled: true # 트레이싱 기능 활성화 (기본값은 true)
+  zipkin:
+    tracing:
+      # Zipkin 서버의 API 엔드포인트 주소입니다.
+      # Docker로 Zipkin을 실행했을 경우 기본 주소입니다.
+      endpoint: http://localhost:9411
+
 logging:
   level:
     org.springframework.security: DEBUG

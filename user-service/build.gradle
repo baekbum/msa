@@ -54,6 +54,14 @@ dependencies {
 	// Spring Cloud Circuit Breaker with Resilience4j
 	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.3.0'
 
+	// Micrometer Tracing 라이브러리 추가
+	// 이 라이브러리가 Sleuth의 역할을 대신하며, 추적을 위한 ID를 생성합니다.
+	implementation 'io.micrometer:micrometer-observation'
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+
+	// Zipkin 서버로 추적 데이터를 전송하는 리포터 라이브러리
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
