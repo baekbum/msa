@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 다른 마이크로서비스들은 디스커버리 및 설정 서버 이후에 실행됩니다.
+  user-service:
+    build: ../../../user-service
+    image: msa/user-service:1.0
+    container_name: user-service
+    environment:
+      #SPRING_CLOUD_CONFIG_URL: http://config-service:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_user:5432/msa
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: hsck2301
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+    depends_on:
+      - postgres_user
+    volumes:
+      - volumes:/tmp
+    networks:
+      - ecommerce-network
+
+  # user-service를 위한 PostgreSQL 데이터베이스
+  postgres_user:
+    image: postgres:17.5
+    container_name: postgres_user
+    environment:
+      POSTGRES_DB: msa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_volumes:/var/lib/postgresql/data
+    networks:
+      ecommerce-network:
+        ipv4_address: 172.18.0.201
+
+volumes:
+  volumes:
+  postgres_volumes:
+
+networks:
+  ecommerce-network:
+    name: ecommerce-network
+    external: true

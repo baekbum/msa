@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '1.0'
 
 java {
 	toolchain {
@@ -24,6 +24,9 @@ dependencies {
 
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+
+	// postgresql 추가
+	runtimeOnly 'org.postgresql:postgresql:42.7.7'
 
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'

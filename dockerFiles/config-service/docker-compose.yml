@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+   # 설정 서버 (Config Server)
+  config-service:
+    build: ../../config-service
+    image: msa/config-service:1.0
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+    volumes:
+      - config_tmp_volumes:/tmp
+    networks:
+      - ecommerce-network
+
+volumes:
+  config_tmp_volumes:
+
+networks:
+  ecommerce-network:
+    name: ecommerce-network
+    external: true

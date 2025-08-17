@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # 서비스 디스커버리 (Eureka)
+  discovery-service:
+    build: ../../service-discovery/
+    image: msa/discovery-service:1.0
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: discovery-service
+    volumes:
+      - discovery_tmp_volumes:/tmp
+    networks:
+      - ecommerce-network
+
+  # API 게이트웨이
+  apigateway-service:
+    build: ../../apigateway-service
+    image: msa/apigateway-service:1.0
+    container_name: apigateway-service
+    ports:
+      - "8000:8000"
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_RABBITMQ_HOST: rabbitmq
+    volumes:
+      - gateway_tmp_volumes:/tmp
+    depends_on:
+      - discovery-service
+    networks:
+      ecommerce-network:
+        ipv4_address: 172.18.0.200
+
+volumes:
+  discovery_tmp_volumes:
+  gateway_tmp_volumes:
+
+networks:
+  ecommerce-network:
+    name: ecommerce-network
+    external: true
