@@ -28,10 +28,11 @@ spring:
                 preLogger: true
                 postLogger: true
           routes:
-            - id: user-service-with-noAuth
+            - id: user-service-without-auth
               uri: lb://USER-SERVICE
               predicates:
-                  - Path=/user-service/{segment:h2-console|add|login}
+#                  - Path=/user-service/{segment:h2-console|login}
+                - Path=/user-service/{segment:login}
               filters:
                   - RemoveRequestHeader=Cookie
             - id: user-service-with-auth

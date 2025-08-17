@@ -13,6 +13,7 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,19 @@ public class UserService  {
     }
 
     @Transactional(readOnly = true)
+    public Boolean existById(String userId) {
+        UserDto userDto = new UserDto(repository.selectById(userId));
+        log.info("userDto : {}", userDto);
+
+        return StringUtils.hasText(userDto.getUserId());
+    }
+
+    @Transactional(readOnly = true)
     public UserDto selectById(String userId) {
         UserDto userDto = new UserDto(repository.selectById(userId));
         userDto.setOrders(getOrders(userId));
+
+        log.info("userDto : {}", userDto);
 
         return userDto;
     }
@@ -63,10 +74,15 @@ public class UserService  {
     @Transactional(readOnly = true)
     public List<ResponseOrder> getOrders(String userId) {
         log.info("circuitBreaker start");
+
         CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
         List<ResponseOrder> orders = circuitBreaker.run(
                 () -> orderServiceClient.getOrderByUserId(userId).getBody(),
-                throwable -> new ArrayList<>());
+                throwable -> {
+                    log.error("CircuitBreaker fallback triggered. Cause: {}", throwable.getMessage());
+                    return new ArrayList<>();
+                }
+        );
 
         log.info("circuitBreaker end");
 

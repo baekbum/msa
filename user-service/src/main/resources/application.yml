@@ -9,29 +9,23 @@ spring:
     port: 5672
     username: guest
     password: guest
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
-      path: /h2-console
   datasource:
 #    driver-class-name: org.h2.Driver
 #    url: jdbc:h2:file:~/msadb;DB_CLOSE_DELAY=-1;
 #    #url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;
 #    username: sa
 #    password:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/msa
-    username: root
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/msa
+    username: postgres
     password:
   jpa:
     hibernate:
-      ddl-auto: create
-  security:
-    user:
-      name: user
-      password: $2a$10$dBTMbV.fmURHgNMEKfH6see8ezKWJmjqMoAK8U5vIaLmTLgQlBiwe
+      ddl-auto: update
+#  security:
+#    user:
+#      name: user
+#      password: $2a$10$dBTMbV.fmURHgNMEKfH6see8ezKWJmjqMoAK8U5vIaLmTLgQlBiwe
 
 eureka:
   instance:
@@ -70,6 +64,7 @@ management:
 logging:
   level:
     com.example.user_service.client: DEBUG
+    org.springframework.security: DEBUG
 #    root: DEBUG
 #    # 특정 패키지 (예: user-service의 컨트롤러가 있는 패키지)
 #    com.example.user_service: DEBUG

@@ -31,6 +31,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseUser);
     }
 
+    @GetMapping("/exist/{userId}")
+    public ResponseEntity<?> isExist(@PathVariable("userId") String userId) {
+        log.info("User exist process start");
+        log.info("UserId : {}", userId);
+
+        HttpStatus httpStatus = userService.existById(userId) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(httpStatus).build();
+    }
+
     @GetMapping("/search/{userId}")
     public ResponseEntity<?> select(@PathVariable("userId") String userId) {
         log.info("User search process start");
