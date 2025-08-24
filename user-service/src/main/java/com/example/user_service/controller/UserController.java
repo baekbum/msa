@@ -68,6 +68,4 @@ public class UserController {
         log.info("UserId : {}", userId);
         return ResponseEntity.ok(new ResponseUser(userService.delete(userId)));
     }
-
-
 }

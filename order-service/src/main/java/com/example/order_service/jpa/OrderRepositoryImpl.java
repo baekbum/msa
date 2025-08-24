@@ -1,6 +1,9 @@
 package com.example.order_service.jpa;
 
 import com.example.order_service.dto.OrderDto;
+import com.example.order_service.vo.OrderCond;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -13,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderRepositoryImpl implements OrderRepository {
 
+    private final JPAQueryFactory queryFactory;
     private final OrderJpaRepository repository;
 
     @Override
@@ -36,5 +40,26 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> selectByUserId(String userId) {
         return repository.findByUserId(userId);
+    }
+
+    @Override
+    public List<Order> selectByOrderCond(OrderCond cond) {
+        QOrder order = QOrder.order;
+
+        return queryFactory
+                .select(order)
+                .from(order)
+                .where(
+                        userIdIn(cond.getUserIdList(), order),
+                        orderIdIn(cond.getOrderIdList(), order)
+                ).fetch();
+    }
+
+    private BooleanExpression userIdIn(List<String> userIdList, QOrder order) {
+        return userIdList != null && !userIdList.isEmpty() ?  order.userId.in(userIdList) : null;
+    }
+
+    private BooleanExpression orderIdIn(List<String> orderIdList, QOrder order) {
+        return orderIdList != null && !orderIdList.isEmpty() ?  order.orderId.in(orderIdList) : null;
     }
 }

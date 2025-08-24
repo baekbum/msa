@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,6 +16,7 @@ public class UserCond {
     String email;
     String name;
     String userId;
+    List<String> userIdList;
 
     @Override
     public String toString() {
@@ -22,6 +25,7 @@ public class UserCond {
                 ", email='" + email + '\'' +
                 ", name='" + name + '\'' +
                 ", userId='" + userId + '\'' +
+                ", userIdList=" + userIdList +
                 '}';
     }
 }

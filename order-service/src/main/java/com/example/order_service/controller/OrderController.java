@@ -2,6 +2,7 @@ package com.example.order_service.controller;
 
 import com.example.order_service.dto.OrderDto;
 import com.example.order_service.service.OrderService;
+import com.example.order_service.vo.OrderCond;
 import com.example.order_service.vo.RequestOrder;
 import com.example.order_service.vo.ResponseOrder;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,12 @@ public class OrderController {
 
         ResponseOrder responseOrder = service.selectByOrderId(orderId);
         return ResponseEntity.status(HttpStatus.OK).body(responseOrder);
+    }
+
+    @PostMapping("search/orders")
+    public ResponseEntity<?> getOrdersWithCond(@RequestBody OrderCond cond) {
+        log.info("Order search process with cond start");
+        List<ResponseOrder> responseOrders = service.selectByOrderCond(cond);
+        return ResponseEntity.status(HttpStatus.OK).body(responseOrders);
     }
 }

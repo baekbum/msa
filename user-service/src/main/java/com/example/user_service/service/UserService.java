@@ -4,6 +4,7 @@ import com.example.user_service.client.OrderServiceClient;
 import com.example.user_service.dto.UserDto;
 import com.example.user_service.jpa.User;
 import com.example.user_service.jpa.UserRepository;
+import com.example.user_service.vo.OrderCond;
 import com.example.user_service.vo.ResponseOrder;
 import com.example.user_service.vo.UserCond;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -55,12 +57,14 @@ public class UserService  {
     public List<UserDto> selectByCond(UserCond cond) {
         List<User> userEntities = repository.selectByCond(cond);
 
+        // 조건에 맞는 UserId를 파라미터로 넘겨서 주문 내역을 가져옴
+        HashMap<String, List<ResponseOrder>> map = orderListToMap(getOrdersWithUserIdList(userEntities));
         List<UserDto> list = new ArrayList<>();
 
         userEntities.stream()
                 .forEach(entity -> {
                     UserDto userDto = new UserDto(entity);
-                    userDto.setOrders(getOrders(userDto.getUserId()));
+                    userDto.setOrders(map.get(entity.getUserId()));
                     list.add(userDto);
                 });
 
@@ -87,5 +91,44 @@ public class UserService  {
         log.info("circuitBreaker end");
 
         return orders;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseOrder> getOrdersWithUserIdList(List<User> userEntities) {
+        log.info("circuitBreaker start");
+
+        List<String> userIdList = userEntities.stream()
+                .map(User::getUserId)
+                .toList();
+
+        OrderCond cond = new OrderCond();
+        cond.setUserIdList(userIdList);
+
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitBreaker");
+        List<ResponseOrder> orders = circuitBreaker.run(
+                () -> orderServiceClient.getOrdersWithCond(cond).getBody(),
+                throwable -> {
+                    log.error("CircuitBreaker fallback triggered. Cause: {}", throwable.getMessage());
+                    return new ArrayList<>();
+                }
+        );
+
+        log.info("circuitBreaker end");
+
+        return orders;
+    }
+
+    private HashMap<String, List<ResponseOrder>> orderListToMap(List<ResponseOrder> responseOrders) {
+        HashMap<String, List<ResponseOrder>> map = new HashMap<>();
+
+        for (ResponseOrder order : responseOrders) {
+            String userId = order.getUserId();
+            if (!map.containsKey(userId)) {
+                map.put(userId, new ArrayList<>());
+            }
+            map.get(userId).add(order);
+        }
+
+        return map;
     }
 }
