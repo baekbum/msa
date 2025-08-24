@@ -5,6 +5,7 @@ import com.example.order_service.dto.OrderDto;
 import com.example.order_service.jpa.OrderRepository;
 import com.example.order_service.kafka.queue.producer.OrderToCatalogProducer;
 import com.example.order_service.kafka.queue.producer.OrderToOrderProducer;
+import com.example.order_service.vo.OrderCond;
 import com.example.order_service.vo.ResponseOrder;
 import com.example.order_service.vo.ResponseUser;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,13 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<ResponseOrder> selectByUserId(String userId) {
         return repository.selectByUserId(userId).stream()
+                .map(ResponseOrder::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResponseOrder> selectByOrderCond(OrderCond cond) {
+        return repository.selectByOrderCond(cond).stream()
                 .map(ResponseOrder::new)
                 .toList();
     }

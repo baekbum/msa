@@ -67,7 +67,8 @@ public class UserRepositoryImpl implements UserRepository {
                         idEq(cond.getId(), user),
                         emailLike(cond.getEmail(), user),
                         nameLike(cond.getName(), user),
-                        userIdLike(cond.getUserId(), user)
+                        userIdLike(cond.getUserId(), user),
+                        userIdIn(cond.getUserIdList(), user)
                 ).fetch();
     }
 
@@ -101,5 +102,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     private BooleanExpression userIdLike(String userIdLike, QUser user) {
         return StringUtils.hasText(userIdLike) ? user.userId.like("%" + userIdLike + "%") : null;
+    }
+
+    private BooleanExpression userIdIn(List<String> userIdList, QUser order) {
+        return !userIdList.isEmpty() ?  order.userId.in(userIdList) : null;
     }
 }

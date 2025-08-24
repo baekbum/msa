@@ -10,6 +10,7 @@ import java.util.Date;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseOrder {
+    private String userId;
     private String productId;
     private Integer quantity;
     private Integer unitPrice;
@@ -19,6 +20,7 @@ public class ResponseOrder {
     private String orderId;
 
     public ResponseOrder(Order order) {
+        this.userId = order.getUserId();
         this.orderId = order.getOrderId();
         this.productId = order.getProductId();
         this.quantity = order.getQuantity();
