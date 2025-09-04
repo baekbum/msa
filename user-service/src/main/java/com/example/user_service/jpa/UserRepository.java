@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface UserRepository {
     User insert(UserDto dto);
+    List<User> selectAll();
     User selectById(String userId);
     User selectByEmail(String email);
     List<User> selectByCond(UserCond cond);

@@ -1,0 +1,15 @@
+.bg-login-image-custom,
+.bg-password-image-custom,
+.bg-register-image-custom {
+  background: url('/img/sign/logo-bg.jpg'); /* /static을 제거 */
+  background-position: center;
+  background-size: cover;
+}
+
+body {
+    display: flex;
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center;     /* 세로 중앙 정렬 */
+    min-height: 100vh;       /* 화면 전체 높이를 차지하도록 설정 */
+    margin: 0;               /* 브라우저 기본 마진 제거 */
+}

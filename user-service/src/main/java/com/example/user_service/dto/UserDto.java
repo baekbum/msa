@@ -20,7 +20,7 @@ public class UserDto {
     private List<ResponseOrder> orders;
 
     public UserDto(RequestUser user) {
-        this.userId = user.getUser_id();
+        this.userId = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.name = user.getName();

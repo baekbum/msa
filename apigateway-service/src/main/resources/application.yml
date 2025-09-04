@@ -18,6 +18,22 @@ spring:
     password: guest
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:8080"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders:
+              - '*'
+            allowCredentials: true
+            exposedHeaders:
+              - 'Auth-Token'
+              - 'User-Id'
       server:
         webflux:
           default-filters:
@@ -31,10 +47,9 @@ spring:
             - id: user-service-without-auth
               uri: lb://USER-SERVICE
               predicates:
-#                  - Path=/user-service/{segment:h2-console|login}
-                - Path=/user-service/{segment:login}
+                - Path=/user-service/{segment:login|add}
               filters:
-                  - RemoveRequestHeader=Cookie
+                - RemoveRequestHeader=Cookie
             - id: user-service-with-auth
               uri: lb://USER-SERVICE
               predicates:
@@ -53,12 +68,9 @@ spring:
 
 logging:
   level:
-    # Spring Cloud Gateway의 라우팅 관련 로그
     org.springframework.cloud.gateway: DEBUG
-    # 로드 밸런서 관련 로그 (Netflix Ribbon 또는 Spring Cloud LoadBalancer)
     org.springframework.cloud.loadbalancer: DEBUG
-    reactor.netty: DEBUG # 네트워크 관련 상세 로그
-    # 서비스 디스커버리 클라이언트 (Eureka) 관련 로그
+    reactor.netty: DEBUG
     com.netflix.eureka: DEBUG
     com.netflix.discovery: DEBUG
 
