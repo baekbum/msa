@@ -1,20 +1,17 @@
 package com.example.user_service.jpa;
 
-import com.example.user_service.client.OrderServiceClient;
 import com.example.user_service.dto.UserDto;
-import com.example.user_service.vo.ResponseOrder;
+import com.example.user_service.exception.UserDuplicateException;
+import com.example.user_service.exception.UserNotExistException;
 import com.example.user_service.vo.UserCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,7 +25,11 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User insert(UserDto dto) {
         if (repository.findByUserId(dto.getUserId()).isPresent()) {
-            throw new RuntimeException("Already User exist");
+            throw new UserDuplicateException("해당 사용자 ID는 이미 존재합니다.");
+        }
+
+        if (repository.findByEmail(dto.getUserId()).isPresent()) {
+            throw new UserDuplicateException("해당 이메일은 이미 존재합니다.");
         }
 
         dto.setUserId(dto.getUserId());
@@ -41,9 +42,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public List<User> selectAll() {
+        return repository.findAll();
+    }
+
+    @Override
     public User selectById(String userId) {
         User foundUser = repository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotExistException("해당 유저를 발견하지 못했습니다."));
 
         return foundUser;
     }
@@ -51,7 +57,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User selectByEmail(String email) {
         User foundUser = repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotExistException("해당 유저를 발견하지 못했습니다."));
 
         return foundUser;
     }

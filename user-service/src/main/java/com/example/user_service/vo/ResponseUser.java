@@ -4,6 +4,7 @@ import com.example.user_service.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -12,6 +13,7 @@ public class ResponseUser {
     private String email;
     private String name;
     private String userId;
+    private LocalDateTime createdAt;
     private List<ResponseOrder> orders;
 
     public ResponseUser(UserDto dto) {
@@ -19,5 +21,6 @@ public class ResponseUser {
         this.name = dto.getName();
         this.userId = dto.getUserId();
         this.orders = dto.getOrders();
+        this.createdAt = dto.getCreatedAt();
     }
 }

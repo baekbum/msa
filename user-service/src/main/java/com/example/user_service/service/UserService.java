@@ -44,6 +44,13 @@ public class UserService  {
     }
 
     @Transactional(readOnly = true)
+    public List<UserDto> selectAll() {
+        return repository.selectAll().stream()
+                .map(UserDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public UserDto selectById(String userId) {
         UserDto userDto = new UserDto(repository.selectById(userId));
         userDto.setOrders(getOrders(userId));

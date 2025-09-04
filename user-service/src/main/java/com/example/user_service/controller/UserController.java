@@ -50,11 +50,11 @@ public class UserController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> selectByCond(@RequestBody UserCond cond) {
+    public ResponseEntity<?> selectByCond(@RequestBody(required = false) UserCond cond) {
         log.info("User search process start");
         log.info("userCond : {}", cond);
 
-        List<UserDto> userList = userService.selectByCond(cond);
+        List<UserDto> userList = cond != null ? userService.selectByCond(cond) : userService.selectAll();
         List<ResponseUser> result = userList.stream()
                 .map(ResponseUser::new)
                 .toList();

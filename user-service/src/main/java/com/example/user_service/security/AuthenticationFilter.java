@@ -73,7 +73,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .signWith(secretKey)
                 .compact();
 
-        response.addHeader("token", token);
-        response.addHeader("userId", user.getUserId());
+        response.addHeader("auth-token", token);
+        response.addHeader("user-id", user.getUserId());
     }
 }
