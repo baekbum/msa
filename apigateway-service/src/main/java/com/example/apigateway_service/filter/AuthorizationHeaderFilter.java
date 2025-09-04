@@ -27,6 +27,9 @@ import java.util.Base64;
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
     Environment env;
 
+    // 사용자 ID를 담는 커스텀 헤더 이름
+    public static final String USER_ID_HEADER = "userId";
+
     public AuthorizationHeaderFilter(Environment env) {
         super(Config.class);
         this.env = env;
@@ -41,15 +44,23 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
+            // 1. Authorization 헤더가 있는지 확인
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 return onError(exchange, "No authorization header", HttpStatus.UNAUTHORIZED);
             }
 
+            // 2. userId 헤더가 있는지 확인
+            if (!request.getHeaders().containsKey(USER_ID_HEADER)) {
+                return onError(exchange, "No user ID header", HttpStatus.UNAUTHORIZED);
+            }
+
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
             String jwt = authorizationHeader.replace("Bearer ", "");
+            String userIdFromHeader = request.getHeaders().get(USER_ID_HEADER).get(0);
 
-            if (!isJwtValid(jwt)) {
-                return onError(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
+            // 3. JWT 유효성과 사용자 ID 일치 여부 검증
+            if (!isJwtValid(jwt, userIdFromHeader)) {
+                return onError(exchange, "JWT token or user ID is not valid", HttpStatus.UNAUTHORIZED);
             }
 
             return chain.filter(exchange);
@@ -66,28 +77,34 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
         return response.writeWith(Flux.just(buffer));
     }
 
-    private boolean isJwtValid(String jwt) {
-        byte[] secretKeyBytes = env.getProperty("token.secret").getBytes();
-        SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
-
+    private boolean isJwtValid(String jwt, String userIdFromHeader) {
         boolean returnValue = true;
         String subject = null;
 
         try {
+            byte[] secretKeyBytes = env.getProperty("token.secret").getBytes();
+            SecretKey signingKey = new SecretKeySpec(secretKeyBytes, SignatureAlgorithm.HS512.getJcaName());
+
             JwtParser jwtParser = Jwts.parser()
                     .setSigningKey(signingKey)
                     .build();
 
+            // 토큰을 파싱하여 subject(사용자 ID) 추출
             subject = jwtParser.parseClaimsJws(jwt).getBody().getSubject();
         } catch (Exception ex) {
             returnValue = false;
         }
 
+        // 1. subject가 비어있는지 확인
         if (subject == null || subject.isEmpty()) {
+            returnValue = false;
+        }
+
+        // 2. 헤더의 userId와 토큰의 subject(사용자 ID)가 일치하는지 비교
+        if (!subject.equals(userIdFromHeader)) {
             returnValue = false;
         }
 
         return returnValue;
     }
-
 }

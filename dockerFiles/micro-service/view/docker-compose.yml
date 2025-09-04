@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  # 다른 마이크로서비스들은 디스커버리 및 설정 서버 이후에 실행됩니다.
+  user-service:
+    build: ../../../view-service
+    image: msa/view-service:1.0
+    container_name: view-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - volumes:/tmp
+    networks:
+      - ecommerce-network
+
+
+volumes:
+  volumes:
+
+networks:
+  ecommerce-network:
+    name: ecommerce-network
+    external: true
