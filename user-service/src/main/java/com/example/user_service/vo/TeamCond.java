@@ -11,13 +11,14 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCond {
+public class TeamCond {
     Long id;
-    String email;
     String name;
-    String userId;
-    List<String> userIdList;
-
-    Long teamId;
+    Long upperTeamId;
+    String upperTeamName;
+    String status;
     List<Long> teamIdList;
+    List<String> teamNameList;
+    List<Long> upperTeamIdList;
+    List<String> upperTeamNameList;
 }

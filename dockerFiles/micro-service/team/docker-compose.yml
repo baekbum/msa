@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 다른 마이크로서비스들은 디스커버리 및 설정 서버 이후에 실행됩니다.
+  team-service:
+    build: ../../../team-service
+    image: msa/team-service:1.0
+    container_name: team-service
+    environment:
+      #SPRING_CLOUD_CONFIG_URL: http://config-service:8888
+      SPRING_RABBITMQ_HOST: rabbitmq
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_team:5432/msa
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: hsck2301
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+    depends_on:
+      - postgres_team
+    volumes:
+      - volumes:/tmp
+    networks:
+      - ecommerce-network
+
+  # team-service를 위한 PostgreSQL 데이터베이스
+  postgres_team:
+    image: postgres:17.5
+    container_name: postgres_team
+    environment:
+      POSTGRES_DB: msa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD:
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_volumes:/var/lib/postgresql/data
+    networks:
+      ecommerce-network:
+        ipv4_address: 172.18.0.202
+
+volumes:
+  volumes:
+    #name: team_service_db_data # 원하는 이름 직접 지정
+  postgres_volumes:
+
+networks:
+  ecommerce-network:
+    name: ecommerce-network
+    external: true
