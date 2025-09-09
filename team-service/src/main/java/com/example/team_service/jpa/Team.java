@@ -31,6 +31,7 @@ public class Team {
     private Team upperTeam;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TeamStatus status;
 
     @CreationTimestamp
