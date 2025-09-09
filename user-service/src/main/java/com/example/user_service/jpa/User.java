@@ -38,6 +38,7 @@ public class User {
     @Column(nullable = false)
     private Long teamId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
 
