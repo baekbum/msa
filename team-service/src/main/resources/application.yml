@@ -1,0 +1,53 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: team-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/msa
+    username: postgres
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+    lease-renewal-interval-in-seconds: 20 # 20초마다 하트비트 전송
+    lease-expiration-duration-in-seconds: 60 # 60초 동안 하트비트 없으면 만료
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - refresh
+          - health
+          - beans
+          - info
+          - busrefresh
+  tracing:
+    sampling:
+      probability: 1.0 # 추적할 요청의 샘플링 확률 (0.0 ~ 1.0).
+      # 1.0은 모든 요청을 추적하며, 개발 단계에서 유용합니다.
+      # 0.1은 10%의 요청만 추적합니다.
+    enabled: true # 트레이싱 기능 활성화 (기본값은 true)
+  zipkin:
+    tracing:
+      # Zipkin 서버의 API 엔드포인트 주소입니다.
+      # Docker로 Zipkin을 실행했을 경우 기본 주소입니다.
+      endpoint: http://localhost:9411
+
+logging:
+  level:
+    com.example.team_service.client: DEBUG
+    org.springframework.security: DEBUG

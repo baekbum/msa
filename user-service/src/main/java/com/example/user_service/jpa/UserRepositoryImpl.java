@@ -1,8 +1,9 @@
 package com.example.user_service.jpa;
 
-import com.example.user_service.dto.UserDto;
 import com.example.user_service.exception.UserDuplicateException;
 import com.example.user_service.exception.UserNotExistException;
+import com.example.user_service.vo.InsertUser;
+import com.example.user_service.vo.UpdateUser;
 import com.example.user_service.vo.UserCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -23,19 +24,18 @@ public class UserRepositoryImpl implements UserRepository {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
-    public User insert(UserDto dto) {
-        if (repository.findByUserId(dto.getUserId()).isPresent()) {
+    public User insert(InsertUser insertInfo) {
+        if (repository.findByUserId(insertInfo.getId()).isPresent()) {
             throw new UserDuplicateException("해당 사용자 ID는 이미 존재합니다.");
         }
 
-        if (repository.findByEmail(dto.getUserId()).isPresent()) {
+        if (repository.findByEmail(insertInfo.getEmail()).isPresent()) {
             throw new UserDuplicateException("해당 이메일은 이미 존재합니다.");
         }
 
-        dto.setUserId(dto.getUserId());
-        User user = new User(dto);
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        insertInfo.setPassword(passwordEncoder.encode(insertInfo.getPassword()));
 
+        User user = new User(insertInfo);
         repository.save(user);
 
         return user;
@@ -48,18 +48,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User selectById(String userId) {
-        User foundUser = repository.findByUserId(userId)
+        return repository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotExistException("해당 유저를 발견하지 못했습니다."));
-
-        return foundUser;
     }
 
     @Override
     public User selectByEmail(String email) {
-        User foundUser = repository.findByEmail(email)
+        return repository.findByEmail(email)
                 .orElseThrow(() -> new UserNotExistException("해당 유저를 발견하지 못했습니다."));
-
-        return foundUser;
     }
 
     @Override
@@ -74,15 +70,18 @@ public class UserRepositoryImpl implements UserRepository {
                         emailLike(cond.getEmail(), user),
                         nameLike(cond.getName(), user),
                         userIdLike(cond.getUserId(), user),
-                        userIdIn(cond.getUserIdList(), user)
+                        userIdIn(cond.getUserIdList(), user),
+                        teamIdEq(cond.getTeamId(), user),
+                        teamIdIn(cond.getTeamIdList(), user)
                 ).fetch();
     }
 
     @Override
-    public User update(String userId, UserDto dto) {
-        // 현재는 수정기능 추가 예정 없음!
+    public User update(String userId, UpdateUser updateInfo) {
         User user = selectById(userId);
-        // 엔티티 업데이트 작업
+
+        user.updateValue(updateInfo);
+
         return user;
     }
 
@@ -93,6 +92,10 @@ public class UserRepositoryImpl implements UserRepository {
         return user;
     }
 
+    @Override
+    public Long findTeam(String userId) {
+        return 0L;
+    }
 
     private BooleanExpression idEq(Long id, QUser user) {
         return id != null ? user.id.eq(id) : null;
@@ -110,7 +113,17 @@ public class UserRepositoryImpl implements UserRepository {
         return StringUtils.hasText(userIdLike) ? user.userId.like("%" + userIdLike + "%") : null;
     }
 
-    private BooleanExpression userIdIn(List<String> userIdList, QUser order) {
-        return !userIdList.isEmpty() ?  order.userId.in(userIdList) : null;
+    private BooleanExpression userIdIn(List<String> userIdList, QUser user) {
+        return userIdList != null && !userIdList.isEmpty()
+                ? user.userId.in(userIdList) : null;
+    }
+
+    private BooleanExpression teamIdEq(Long teamId, QUser user) {
+        return teamId != null ? user.teamId.eq(teamId) : null;
+    }
+
+    private BooleanExpression teamIdIn(List<Long> teamIdList, QUser user) {
+        return teamIdList != null && !teamIdList.isEmpty()
+                ? user.teamId.in(teamIdList) : null;
     }
 }

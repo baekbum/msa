@@ -13,11 +13,11 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        if (response.status() == 400 || response.status() == 404) {
-            if (methodKey.contains("getOrderByUserId")) {
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 주문정보가 존재하지 않습니다.");
-            }
-        }
+//        if (response.status() == 400 || response.status() == 404) {
+//            if (methodKey.contains("getOrderByUserId")) {
+//                return new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자의 주문정보가 존재하지 않습니다.");
+//            }
+//        }
 
         return null;
     }

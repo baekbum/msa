@@ -57,6 +57,10 @@ spring:
               filters:
                 - RemoveRequestHeader=Cookie
                 - AuthorizationHeaderFilter
+            - id: team-service
+              uri: lb://TEAM-SERVICE
+              predicates:
+                - Path=/team-service/**
             - id: catalog-service
               uri: lb://CATALOG-SERVICE
               predicates:

@@ -1,35 +1,34 @@
 package com.example.user_service.dto;
 
 import com.example.user_service.jpa.User;
-import com.example.user_service.vo.RequestUser;
+import com.example.user_service.vo.InsertUser;
 import com.example.user_service.vo.ResponseOrder;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private String userId;
     private String name;
-    private String email;
     private String password;
+    private String email;
+    private Long teamId;
+    private String teamName;
+    private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    private List<ResponseOrder> orders;
-
-    public UserDto(RequestUser user) {
-        this.userId = user.getId();
-        this.email = user.getEmail();
-        this.password = user.getPassword();
+    public UserDto(User user) {
+        this.userId = user.getUserId();
         this.name = user.getName();
-    }
-
-    public UserDto(User entity) {
-        this.userId = entity.getUserId();
-        this.name = entity.getName();
-        this.email = entity.getEmail();
-        this.createdAt = entity.getCreateAt();
+        this.email = user.getEmail();
+        this.teamId = user.getTeamId();
+        this.status = user.getStatus().name();
+        this.createdAt = user.getCreateAt();
+        this.updatedAt = user.getUpdatedAt();
     }
 }
