@@ -1,18 +1,24 @@
 package com.example.team_service.jpa;
 
-import com.example.team_service.dto.TeamDto;
 import com.example.team_service.enums.TeamStatus;
 import com.example.team_service.exception.TeamDuplicateException;
 import com.example.team_service.exception.TeamNotExistException;
 import com.example.team_service.vo.InsertTeam;
 import com.example.team_service.vo.TeamCond;
 import com.example.team_service.vo.UpdateTeam;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -38,8 +44,8 @@ public class TeamRepositoryImpl implements TeamRepository {
     }
 
     @Override
-    public List<Team> selectAll() {
-        return repository.findAll();
+    public Page<Team> selectAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -49,10 +55,18 @@ public class TeamRepositoryImpl implements TeamRepository {
     }
 
     @Override
-    public List<Team> selectByCond(TeamCond cond) {
+    public Page<Team> selectByCond(TeamCond cond, Pageable pageable) {
         QTeam team = QTeam.team;
 
-        return queryFactory
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        pageable.getSort().forEach(order -> {
+            Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+            String property = order.getProperty();
+            PathBuilder<Team> entityPath = new PathBuilder<>(Team.class, "team");
+            orderSpecifiers.add(new OrderSpecifier(direction, entityPath.get(property)));
+        });
+
+        List<Team> content = queryFactory
                 .select(team)
                 .from(team)
                 .where(
@@ -65,7 +79,29 @@ public class TeamRepositoryImpl implements TeamRepository {
                         teamNameIn(cond.getTeamNameList(), team),
                         upperTeamIdIn(cond.getUpperTeamIdList(), team),
                         upperTeamNameIn(cond.getUpperTeamNameList(), team)
-                ).fetch();
+                )
+                .offset(pageable.getOffset()) // 오프셋 적용
+                .limit(pageable.getPageSize()) // 페이지 크기 적용
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 정렬 정보 적용
+                .fetch();
+
+        Long total = queryFactory
+                .select(team.count())
+                .from(team)
+                .where(
+                        idEq(cond.getId(), team),
+                        nameLike(cond.getName(), team),
+                        upperTeamIdEq(cond.getUpperTeamId(), team),
+                        upperTeamNameLike(cond.getUpperTeamName(), team),
+                        statusEq(cond.getStatus(), team),
+                        teamIdIn(cond.getTeamIdList(), team),
+                        teamNameIn(cond.getTeamNameList(), team),
+                        upperTeamIdIn(cond.getUpperTeamIdList(), team),
+                        upperTeamNameIn(cond.getUpperTeamNameList(), team)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override

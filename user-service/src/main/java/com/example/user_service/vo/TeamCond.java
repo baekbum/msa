@@ -21,4 +21,8 @@ public class TeamCond {
     List<String> teamNameList;
     List<Long> upperTeamIdList;
     List<String> upperTeamNameList;
+
+    Integer page = 0;
+    Integer size = 10;
+    List<String> sort;
 }

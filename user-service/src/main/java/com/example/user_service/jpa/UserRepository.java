@@ -1,21 +1,17 @@
 package com.example.user_service.jpa;
 
-import com.example.user_service.dto.UserDto;
 import com.example.user_service.vo.InsertUser;
-import com.example.user_service.vo.ResponseOrder;
 import com.example.user_service.vo.UpdateUser;
 import com.example.user_service.vo.UserCond;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserRepository {
     User insert(InsertUser insertInfo);
-    List<User> selectAll();
+    Page<User> selectAll(Pageable pageable);
     User selectById(String userId);
     User selectByEmail(String email);
-    List<User> selectByCond(UserCond cond);
+    Page<User> selectByCond(UserCond cond, Pageable pageable);
     User update(String userId, UpdateUser updateInfo);
     User delete(String userId);
-
-    Long findTeam(String userId);
 }

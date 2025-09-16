@@ -10,11 +10,13 @@ import com.example.user_service.vo.InsertUser;
 import com.example.user_service.vo.TeamCond;
 import com.example.user_service.vo.UpdateUser;
 import com.example.user_service.vo.UserCond;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static feign.FeignException.*;
+import static feign.FeignException.FeignClientException;
 
 
 @Service
@@ -71,8 +73,9 @@ public class UserService  {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<UserDto> selectAll() {
-        List<User> users = repository.selectAll();
+    public Page<UserDto> selectAll(UserCond cond) {
+        PageRequest pageRequest = PageRequest.of(cond.getPage(), cond.getSize(), makeSortInfo(cond.getSort()));
+        Page<User> users = repository.selectAll(pageRequest);
         HashMap<Long, String> teamMap = teamDtoListToMap(getTeamsInfo(extractTeamId(users)));
 
         return makeUserDtoList(users, teamMap);
@@ -98,8 +101,9 @@ public class UserService  {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<UserDto> selectByCond(UserCond cond) {
-        List<User> users = repository.selectByCond(cond);
+    public Page<UserDto> selectByCond(UserCond cond) {
+        PageRequest pageRequest = PageRequest.of(cond.getPage(), cond.getSize(), makeSortInfo(cond.getSort()));
+        Page<User> users = repository.selectByCond(cond, pageRequest);
         HashMap<Long, String> teamMap = teamDtoListToMap(getTeamsInfo(extractTeamId(users)));
 
         return makeUserDtoList(users, teamMap);
@@ -192,26 +196,62 @@ public class UserService  {
 
         TeamCond cond = new TeamCond();
         cond.setTeamIdList(teamIdList);
+        cond.setPage(0);
+        cond.setSize(teamIdList.size());
 
-        // Feign Client 호출 결과를 ResponseEntity<Void>로 받습니다.
-        List<TeamDto> TeamDtoList = circuitBreaker.run(
-                () -> teamServiceClient.selectByCond(cond).getBody(),
+        // circuitBreaker.run()의 반환 타입을 List<TeamDto>로 명확히 설정합니다.
+        List<TeamDto> teamDtoList = circuitBreaker.run(
+                () -> teamServiceClient.selectByCond(cond).getBody().getContent(),
                 throwable -> {
                     log.error("CircuitBreaker fallback triggered. Cause: {}", throwable.getMessage());
                     return new ArrayList<>();
                 }
         );
-
-        return TeamDtoList;
+        return teamDtoList;
     }
 
-    private List<Long> extractTeamId(List<User> userList) {
+    /**
+     * 검색 조건에서 sort 옵션을 처리하기 위한 메서드
+     * @param sorts
+     * @return
+     */
+    private Sort makeSortInfo(List<String> sorts) {
+        Sort sort = Sort.unsorted();
+        if (sorts != null && !sorts.isEmpty()) {
+            List<Sort.Order> orders = new ArrayList<>();
+
+            for (String infoStr : sorts) {
+                String[] infos = infoStr.split("-");
+
+                if (infos.length == 2) {
+                    String field = infos[0];
+                    String direction = infos[1];
+                    orders.add(new Sort.Order(Sort.Direction.fromString(direction), field));
+                }
+            }
+            sort = Sort.by(orders);
+        }
+
+        return sort;
+    }
+
+    /**
+     * 유저 리스트에서 팀 정보를 만드는 메서드
+     * @param userList
+     * @return
+     */
+    private List<Long> extractTeamId(Page<User> userList) {
         return userList.stream()
                 .distinct()
                 .map(User::getTeamId)
                 .toList();
     }
 
+    /**
+     * 팀 DTO -> Map(ID, NAME)으로 변환
+     * @param teamDtoList
+     * @return
+     */
     private HashMap<Long, String> teamDtoListToMap(List<TeamDto> teamDtoList) {
         HashMap<Long, String> teamMap = new HashMap<>();
 
@@ -224,17 +264,21 @@ public class UserService  {
         return teamMap;
     }
 
-    private List<UserDto> makeUserDtoList(List<User> users, HashMap<Long, String> teamMap) {
-        List<UserDto> userDtoList = new ArrayList<>();
+    /**
+     * Page<User> 객체 -> Page<UserDto> 변환
+     * @param users
+     * @param teamMap
+     * @return
+     */
+    private Page<UserDto> makeUserDtoList(Page<User> users, HashMap<Long, String> teamMap) {
+        Page<UserDto> pageUsers = users.map(UserDto::new);
 
-        for (User user : users) {
-            UserDto userDto = new UserDto(user);
-            userDto.setTeamId(userDto.getTeamId());
-            userDto.setTeamName(teamMap.get(userDto.getTeamId()));
+        pageUsers.stream()
+                .forEach(dto -> {
+                    dto.setTeamId(dto.getTeamId());
+                    dto.setTeamName(teamMap.get(dto.getTeamId()));
+                });
 
-            userDtoList.add(userDto);
-        }
-
-        return userDtoList;
+        return pageUsers;
     }
 }
