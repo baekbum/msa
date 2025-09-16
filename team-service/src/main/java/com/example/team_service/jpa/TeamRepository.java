@@ -1,17 +1,16 @@
 package com.example.team_service.jpa;
 
-import com.example.team_service.dto.TeamDto;
 import com.example.team_service.vo.InsertTeam;
 import com.example.team_service.vo.TeamCond;
 import com.example.team_service.vo.UpdateTeam;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TeamRepository {
     Team insert(InsertTeam insertInfo);
-    List<Team> selectAll();
+    Page<Team> selectAll(Pageable pageable);
     Team selectById(Long teamId);
-    List<Team> selectByCond(TeamCond cond);
+    Page<Team> selectByCond(TeamCond cond, Pageable pageable);
     Team update(Long teamId, UpdateTeam updateInfo);
     Team delete(Long teamId);
 }

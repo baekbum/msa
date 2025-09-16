@@ -5,13 +5,20 @@ import com.example.user_service.exception.UserNotExistException;
 import com.example.user_service.vo.InsertUser;
 import com.example.user_service.vo.UpdateUser;
 import com.example.user_service.vo.UserCond;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -42,8 +49,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> selectAll() {
-        return repository.findAll();
+    public Page<User> selectAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
@@ -59,10 +66,51 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> selectByCond(UserCond cond) {
+    public Page<User> selectByCond(UserCond cond, Pageable pageable) {
         QUser user = QUser.user;
 
-        return queryFactory
+        // 1. Pageable 객체에서 Sort 정보를 추출하여 OrderSpecifier 리스트를 만듭니다.
+        List<OrderSpecifier> orderSpecifiers = new ArrayList<>();
+        pageable.getSort().forEach(order -> {
+            Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+            String property = order.getProperty();
+            PathBuilder<User> entityPath = new PathBuilder<>(User.class, "user");
+            orderSpecifiers.add(new OrderSpecifier(direction, entityPath.get(property)));
+
+            // Q-class를 사용하여 각 필드에 대한 정렬 조건을 명시적으로 추가합니다.
+//            switch (property) {
+//                case "id":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.id));
+//                    break;
+//                case "userId":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.userId));
+//                    break;
+//                case "name":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.name));
+//                    break;
+//                case "email":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.email));
+//                    break;
+//                case "teamId":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.teamId));
+//                    break;
+//                case "status":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.status));
+//                    break;
+//                case "createAt":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.createAt));
+//                    break;
+//                case "updatedAt":
+//                    orderSpecifiers.add(new OrderSpecifier<>(direction, user.updatedAt));
+//                    break;
+//                default:
+//                    // 정렬 기준이 되는 필드를 찾지 못한 경우
+//                    // 예외를 던지거나 기본 정렬 조건을 추가할 수 있습니다.
+//                    throw new IllegalArgumentException("Invalid sort property: " + property);
+//            }
+        });
+
+        List<User> content = queryFactory
                 .select(user)
                 .from(user)
                 .where(
@@ -73,7 +121,27 @@ public class UserRepositoryImpl implements UserRepository {
                         userIdIn(cond.getUserIdList(), user),
                         teamIdEq(cond.getTeamId(), user),
                         teamIdIn(cond.getTeamIdList(), user)
-                ).fetch();
+                )
+                .offset(pageable.getOffset()) // 오프셋 적용
+                .limit(pageable.getPageSize()) // 페이지 크기 적용
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 정렬 정보 적용
+                .fetch();
+
+        Long total = queryFactory
+                .select(user.count())
+                .from(user)
+                .where(
+                        idEq(cond.getId(), user),
+                        emailLike(cond.getEmail(), user),
+                        nameLike(cond.getName(), user),
+                        userIdLike(cond.getUserId(), user),
+                        userIdIn(cond.getUserIdList(), user),
+                        teamIdEq(cond.getTeamId(), user),
+                        teamIdIn(cond.getTeamIdList(), user)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total);
     }
 
     @Override
@@ -90,11 +158,6 @@ public class UserRepositoryImpl implements UserRepository {
         User user = selectById(userId);
         repository.delete(user);
         return user;
-    }
-
-    @Override
-    public Long findTeam(String userId) {
-        return 0L;
     }
 
     private BooleanExpression idEq(Long id, QUser user) {

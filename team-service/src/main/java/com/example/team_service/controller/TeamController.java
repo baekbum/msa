@@ -7,11 +7,10 @@ import com.example.team_service.vo.TeamCond;
 import com.example.team_service.vo.UpdateTeam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -56,8 +55,8 @@ public class TeamController {
         log.info("Team search process with cond start");
         log.info("TeamCond : {}", cond);
 
-        List<TeamDto> selectDtoList = cond != null ? teamService.selectByCond(cond) : teamService.selectAll();
-        log.info("selectDtoList size : {}", selectDtoList.size());
+        Page<TeamDto> selectDtoList = cond.isParamExist() ? teamService.selectByCond(cond) : teamService.selectAll(cond);
+        log.info("selectDtoList size : {}", selectDtoList.getTotalElements());
 
         return ResponseEntity.status(HttpStatus.OK).body(selectDtoList);
     }

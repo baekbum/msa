@@ -7,6 +7,7 @@ import com.example.user_service.vo.UpdateUser;
 import com.example.user_service.vo.UserCond;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +58,8 @@ public class UserController {
         log.info("User search process with cond start");
         log.info("UserCond : {}", cond);
 
-        List<UserDto> userDtoList = cond != null ? userService.selectByCond(cond) : userService.selectAll();
-        log.info("UserDtoList size : {}", userDtoList.size());
+        Page<UserDto> userDtoList = cond.isParamExist() ? userService.selectByCond(cond) : userService.selectAll(cond);
+        log.info("UserDtoList size : {}", userDtoList.getTotalElements());
 
         return ResponseEntity.status(HttpStatus.OK).body(userDtoList);
     }
