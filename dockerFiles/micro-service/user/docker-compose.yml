@@ -17,7 +17,7 @@ services:
     depends_on:
       - postgres_user
     volumes:
-      - volumes:/tmp
+      - volumes:/home/user/profile/uploads
     networks:
       - ecommerce-network
 

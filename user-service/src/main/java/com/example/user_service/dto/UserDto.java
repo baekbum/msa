@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
+    private Long id;
     private String userId;
     private String name;
     private String password;
@@ -23,6 +24,7 @@ public class UserDto {
     private LocalDateTime updatedAt;
 
     public UserDto(User user) {
+        this.id = user.getId();
         this.userId = user.getUserId();
         this.name = user.getName();
         this.email = user.getEmail();

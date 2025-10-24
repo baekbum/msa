@@ -68,3 +68,7 @@ logging:
 #    root: DEBUG
 #    # 특정 패키지 (예: user-service의 컨트롤러가 있는 패키지)
 #    com.example.user_service: DEBUG
+
+user:
+  profile:
+    dir: /home/user/profile/uploads
